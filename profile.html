@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f3f4f6;
+            --card-bg: #ffffff; --text-color: #1f2937; --text-secondary: #6b7280;
+            --border-color: #e5e7eb; --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --font-family: 'Inter', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        .dashboard-container { min-height: 100vh; display: flex; }
+        .sidebar { width: 250px; background-color: var(--card-bg); padding: 2rem 1rem; box-shadow: var(--shadow); position: fixed; left: 0; top: 0; bottom: 0; transition: transform 0.3s ease-in-out; z-index: 1000; }
+        .sidebar-header { text-align: center; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .sidebar-nav a { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: var(--text-secondary); text-decoration: none; transition: background-color 0.2s, color 0.2s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background-color: var(--primary-color); color: var(--card-bg); }
+        .sidebar-nav a i { margin-right: 1rem; width: 20px; text-align: center; }
+        .main-content { flex-grow: 1; margin-left: 250px; padding: 2rem; transition: margin-left 0.3s ease-in-out; }
+        .header-bar { background-color: var(--card-bg); padding: 1rem 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .hamburger { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); }
+        .card { background-color: var(--card-bg); border-radius: 0.5rem; box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-header { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-secondary); }
+        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; background-color: var(--bg-color); transition: border-color 0.2s; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background-color: var(--primary-color); color: var(--card-bg); }
+        @media (max-width: 1024px) { .main-content { margin-left: 0; } .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } .hamburger { display: block; } }
+        .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column-reverse; }
+        .toast { background-color: #333; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; margin-top: 0.5rem; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">Reseller</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="add-product.html" class="nav-link"><i class="fas fa-plus-circle"></i> Add Product</a>
+                <a href="inventory.html" class="nav-link"><i class="fas fa-box"></i> Inventory</a>
+                <a href="orders.html" class="nav-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="earnings.html" class="nav-link"><i class="fas fa-wallet"></i> Earnings</a>
+                <a href="withdrawals.html" class="nav-link"><i class="fas fa-credit-card"></i> Withdrawal</a>
+                <a href="profile.html" class="nav-link active"><i class="fas fa-user-circle"></i> Profile Settings</a>
+            </nav>
+            <div style="margin-top: auto;"><a href="#" class="nav-link" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <div class="header-bar">
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <div style="font-weight: 600;">Welcome, <span id="sellerName"></span>!</div>
+            </div>
+            <section id="profile" class="content-section active">
+                <div class="card">
+                    <div class="card-header">Profile Settings</div>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="businessName">Business Name</label>
+                            <input type="text" id="businessName" name="businessName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="upiId">UPI ID</label>
+                            <input type="text" id="upiId" name="upiId">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-header">Change Password</div>
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module">
+        import { auth, database, onValue, ref, onAuthStateChanged, showToast, update, updatePassword, handleLogout } from './firebaseconnect.js';
+
+        let currentSellerId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            handleLogout();
+            document.getElementById('hamburger').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('active'); });
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentSellerId = user.uid;
+                    onValue(ref(database, `sellers/${currentSellerId}`), (snapshot) => {
+                        const sellerData = snapshot.val() || {};
+                        const profile = sellerData.profile || {};
+                        document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
+                        document.getElementById('businessName').value = profile.businessName || '';
+                        document.getElementById('phoneNumber').value = profile.phoneNumber || '';
+                        document.getElementById('upiId').value = profile.upiId || '';
+                    });
+                }
+            });
+
+            const profileForm = document.getElementById('profileForm');
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentSellerId) return;
+                const profileUpdates = {
+                    businessName: document.getElementById('businessName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    upiId: document.getElementById('upiId').value
+                };
+                try {
+                    await update(ref(database, `sellers/${currentSellerId}/profile`), profileUpdates);
+                    showToast('Profile updated successfully!');
+                } catch (error) {
+                    showToast(`Error updating profile: ${error.message}`);
+                }
+            });
+
+            const passwordForm = document.getElementById('passwordForm');
+            passwordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentSellerId) return;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                if (newPassword !== confirmPassword) { showToast('New password and confirm password do not match.'); return; }
+                const user = auth.currentUser;
+                if (user) {
+                    try {
+                        await updatePassword(user, newPassword);
+                        showToast('Password changed successfully!');
+                        passwordForm.reset();
+                    } catch (error) {
+                        showToast(`Error changing password: ${error.message}`);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

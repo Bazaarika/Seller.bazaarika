@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f3f4f6;
+            --card-bg: #ffffff; --text-color: #1f2937; --text-secondary: #6b7280;
+            --border-color: #e5e7eb; --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --font-family: 'Inter', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        .dashboard-container { min-height: 100vh; display: flex; }
+        .sidebar { width: 250px; background-color: var(--card-bg); padding: 2rem 1rem; box-shadow: var(--shadow); position: fixed; left: 0; top: 0; bottom: 0; transition: transform 0.3s ease-in-out; z-index: 1000; }
+        .sidebar-header { text-align: center; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .sidebar-nav a { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: var(--text-secondary); text-decoration: none; transition: background-color 0.2s, color 0.2s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background-color: var(--primary-color); color: var(--card-bg); }
+        .sidebar-nav a i { margin-right: 1rem; width: 20px; text-align: center; }
+        .main-content { flex-grow: 1; margin-left: 250px; padding: 2rem; transition: margin-left 0.3s ease-in-out; }
+        .header-bar { background-color: var(--card-bg); padding: 1rem 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .hamburger { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); }
+        .card { background-color: var(--card-bg); border-radius: 0.5rem; box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-header { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background-color: var(--primary-color); color: var(--card-bg); }
+        @media (max-width: 1024px) { .main-content { margin-left: 0; } .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } .hamburger { display: block; } }
+        .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column-reverse; }
+        .toast { background-color: #333; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; margin-top: 0.5rem; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">Reseller</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="add-product.html" class="nav-link"><i class="fas fa-plus-circle"></i> Add Product</a>
+                <a href="inventory.html" class="nav-link"><i class="fas fa-box"></i> Inventory</a>
+                <a href="orders.html" class="nav-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="earnings.html" class="nav-link active"><i class="fas fa-wallet"></i> Earnings</a>
+                <a href="withdrawals.html" class="nav-link"><i class="fas fa-credit-card"></i> Withdrawal</a>
+                <a href="profile.html" class="nav-link"><i class="fas fa-user-circle"></i> Profile Settings</a>
+            </nav>
+            <div style="margin-top: auto;"><a href="#" class="nav-link" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <div class="header-bar">
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <div style="font-weight: 600;">Welcome, <span id="sellerName"></span>!</div>
+            </div>
+            <section id="earnings" class="content-section active">
+                <div class="card">
+                    <div class="card-header">Earnings Summary</div>
+                    <div class="grid-3">
+                        <div class="card">
+                            <h3 style="font-size: 1.125rem; font-weight: 500;">Total Sales</h3>
+                            <p style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">₹<span id="totalSalesEarnings">0</span></p>
+                        </div>
+                        <div class="card">
+                            <h3 style="font-size: 1.125rem; font-weight: 500;">Commission Earned</h3>
+                            <p style="font-size: 2rem; font-weight: 700; color: #10b981;">₹<span id="commissionEarned">0</span></p>
+                        </div>
+                        <div class="card">
+                            <h3 style="font-size: 1.125rem; font-weight: 500;">Withdrawable Balance</h3>
+                            <p style="font-size: 2rem; font-weight: 700; color: #f59e0b;">₹<span id="withdrawableBalance">0</span></p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="initiateWithdrawalBtn" style="margin-top: 1.5rem;">Withdraw Earnings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module">
+        import { auth, database, onValue, ref, onAuthStateChanged, handleLogout } from './firebaseconnect.js';
+        
+        let currentSellerId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            handleLogout();
+            document.getElementById('hamburger').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('active'); });
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentSellerId = user.uid;
+                    onValue(ref(database, `sellers/${currentSellerId}`), (snapshot) => {
+                        const sellerData = snapshot.val() || {};
+                        const profile = sellerData.profile || {};
+                        const orders = sellerData.orders || {};
+                        const withdrawals = sellerData.withdrawals || {};
+                        document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
+                        
+                        const orderList = Object.values(orders);
+                        const withdrawalList = Object.values(withdrawals);
+                        
+                        const totalSales = orderList.reduce((sum, order) => sum + parseFloat(order.amount), 0);
+                        const commissionEarned = totalSales * 0.1; // 10% commission
+                        const totalWithdrawn = withdrawalList.filter(w => w.status === 'Completed').reduce((sum, w) => sum + parseFloat(w.amount), 0);
+                        const withdrawableBalance = commissionEarned - totalWithdrawn;
+
+                        document.getElementById('totalSalesEarnings').textContent = totalSales.toFixed(2);
+                        document.getElementById('commissionEarned').textContent = commissionEarned.toFixed(2);
+                        document.getElementById('withdrawableBalance').textContent = withdrawableBalance.toFixed(2);
+                    });
+                }
+            });
+
+            document.getElementById('initiateWithdrawalBtn').addEventListener('click', () => {
+                window.location.href = 'withdrawals.html';
+            });
+        });
+    </script>
+</body>
+</html>
