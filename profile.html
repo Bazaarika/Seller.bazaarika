@@ -95,34 +95,25 @@
         </main>
     </div>
     <script type="module">
-        import { auth, database, ref, onAuthStateChanged, showToast, update, updatePassword, handleLogout } from './firebaseconnect.js';
-        import { get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { auth, database, onValue, ref, onAuthStateChanged, showToast, update, updatePassword, handleLogout } from './firebaseconnect.js';
 
         let currentSellerId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             handleLogout();
-            document.getElementById('hamburger').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('active');
-            });
-
-            onAuthStateChanged(auth, async (user) => {
+            document.getElementById('hamburger').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('active'); });
+            
+            onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentSellerId = user.uid;
-
-                    try {
-                        const snapshot = await get(ref(database, `sellers/${currentSellerId}`));
-                        if (snapshot.exists()) {
-                            const sellerData = snapshot.val() || {};
-                            const profile = sellerData.profile || {};
-                            document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
-                            document.getElementById('businessName').value = profile.businessName || '';
-                            document.getElementById('phoneNumber').value = profile.phoneNumber || '';
-                            document.getElementById('upiId').value = profile.upiId || '';
-                        }
-                    } catch (error) {
-                        console.error("Error loading profile:", error);
-                    }
+                    onValue(ref(database, `sellers/${currentSellerId}`), (snapshot) => {
+                        const sellerData = snapshot.val() || {};
+                        const profile = sellerData.profile || {};
+                        document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
+                        document.getElementById('businessName').value = profile.businessName || '';
+                        document.getElementById('phoneNumber').value = profile.phoneNumber || '';
+                        document.getElementById('upiId').value = profile.upiId || '';
+                    });
                 }
             });
 
@@ -149,10 +140,7 @@
                 if (!currentSellerId) return;
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
-                if (newPassword !== confirmPassword) {
-                    showToast('New password and confirm password do not match.');
-                    return;
-                }
+                if (newPassword !== confirmPassword) { showToast('New password and confirm password do not match.'); return; }
                 const user = auth.currentUser;
                 if (user) {
                     try {
