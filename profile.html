@@ -103,17 +103,21 @@
             handleLogout();
             document.getElementById('hamburger').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('active'); });
             
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentSellerId = user.uid;
-                    onValue(ref(database, `sellers/${currentSellerId}`), (snapshot) => {
-                        const sellerData = snapshot.val() || {};
-                        const profile = sellerData.profile || {};
-                        document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
-                        document.getElementById('businessName').value = profile.businessName || '';
-                        document.getElementById('phoneNumber').value = profile.phoneNumber || '';
-                        document.getElementById('upiId').value = profile.upiId || '';
-                    });
+import { get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+get(ref(database, `sellers/${currentSellerId}`)).then((snapshot) => {
+    if (snapshot.exists()) {
+        const sellerData = snapshot.val() || {};
+        const profile = sellerData.profile || {};
+        document.getElementById('sellerName').textContent = profile.businessName || 'Seller';
+        document.getElementById('businessName').value = profile.businessName || '';
+        document.getElementById('phoneNumber').value = profile.phoneNumber || '';
+        document.getElementById('upiId').value = profile.upiId || '';
+    }
+}).catch((error) => {
+    console.error("Error getting profile data:", error);
+});
+
                 }
             });
 
